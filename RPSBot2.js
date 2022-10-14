@@ -1,3 +1,11 @@
+/* this bot is supposed to:
+- start every first turn with a dynamite
+- check if it's attacked by a 100 dynamites; if yes - attack back with water balloons
+- keep count of opponent's dynamites and stop using water balloons if opponent's run out
+- if a round ends with a tie - it attacks with dynamite (if it's still possible), if not - attacks with water balloons (disabled)
+- if no other conditions are met, attacks with a move that wasn't used in the previous round
+- can display turn count, how many points are at stake and results of the previous round */
+
 const possibleMoveOptions = ["R", "P", "S", "D", "W"];
 
 class Bot {
@@ -28,8 +36,7 @@ class Bot {
                 : "D";   
 
         if (this.turnCount > 2) {
-        this.getWins (gamestate);
-        console.log('p1: ', this.p2wins, 'p2:', this.p1wins)
+        this.getLastRoundResults (gamestate);
         }
 
         if (lastP1Move === possibleMoveOptions[3]) {
@@ -40,21 +47,6 @@ class Bot {
             this.dynamiteCount--;
             console.log('p2:', possibleMoveOptions[3])
             return possibleMoveOptions[3];
-        }
-
-        if (lastP1Move === lastP2Move && this.dynamiteCount > 0) {
-            this.dynamiteCount--;
-            console.log('p2:', possibleMoveOptions[3])
-            return possibleMoveOptions[3];
-        }
-
-        if (
-            lastP1Move === lastP2Move &&
-            this.dynamiteCount <= 0 &&
-            this.opponentDynamiteCount > 0
-        ) {
-            console.log('p2:', possibleMoveOptions[4])
-            return possibleMoveOptions[4];
         }
 
         if (
@@ -70,12 +62,29 @@ class Bot {
             }
         }
 
+        if (lastP1Move === lastP2Move && this.dynamiteCount > 0 && this.nextRoundScore >= 3) {
+            this.dynamiteCount--;
+            console.log('p2:', possibleMoveOptions[3])
+            return possibleMoveOptions[3];
+        }
+
+      /*  if (
+            lastP1Move === lastP2Move &&
+            this.dynamiteCount <= 0 &&
+            this.opponentDynamiteCount > 0
+        ) {
+            console.log('p2:', possibleMoveOptions[4])
+            return possibleMoveOptions[4];
+        } */
+
+
+
         console.log('p2:', this.getTheMove(lastP1Move, lastP2Move))
         return this.getTheMove(lastP1Move, lastP2Move);
     }
 
     getTheMove(opponentMove, myMove) {
-        const optionsForMove = ["R", "P", "S", "D", "W"];
+        const optionsForMove = ["R", "P", "S", "W"];
         let opponentMoveIndex;
         let myMoveIndex;
         let waterIndex;
@@ -107,7 +116,7 @@ class Bot {
         }
         spliceArrayAtIndex(waterIndex, optionsForMove);
 
-        if (this.dynamiteCount <= 0) {
+      /*  if (this.dynamiteCount <= 0) {
             for (let i = 0; i < optionsForMove.length; i++) {
                 if (optionsForMove[i] === "D") {
                     dynamiteIndex = i;
@@ -115,7 +124,7 @@ class Bot {
                 }
             }
         }
-        spliceArrayAtIndex(dynamiteIndex, optionsForMove);
+        spliceArrayAtIndex(dynamiteIndex, optionsForMove); */
 
         if (optionsForMove.length > 1) {
             let lengthOfOptionsForMove = optionsForMove.length;
@@ -136,7 +145,7 @@ class Bot {
         return optionsForMove[0];
     }
 
-    getWins (gamestate) {
+    getLastRoundResults (gamestate) {
 
         console.log('+ score:', this.nextRoundScore)
 
