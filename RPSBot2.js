@@ -2,42 +2,58 @@ const possibleMoveOptions = ["R", "P", "S", "D", "W"];
 class Bot {
     constructor() {
         this.dynamiteCount = 100;
-        this.waterCount = 97;
+        this.waterCount = 96;
         this.turnCount = 0;
+        this.opponentDynamiteCount = 100;
     }
-    
+
     makeMove(gamestate) {
+        this.turnCount++;
+
         const lastP1Move =
-            this.turnCount > 0
+            this.turnCount > 1
                 ? gamestate.rounds[gamestate.rounds.length - 1].p1
                 : "R";
+
         const lastP2Move =
-            this.turnCount > 0
+            this.turnCount > 1
                 ? gamestate.rounds[gamestate.rounds.length - 1].p2
-                : "S";
+                : "D";
+
+        if (lastP1Move === possibleMoveOptions[3]) {
+            this.opponentDynamiteCount--;
+        }
 
         if (gamestate.rounds.length === 0) {
             this.dynamiteCount--;
-            this.turnCount++;
             return possibleMoveOptions[3];
         }
 
-         if (lastP1Move === lastP2Move && this.dynamiteCount > 0) {
+        if (lastP1Move === lastP2Move && this.dynamiteCount > 0) {
             this.dynamiteCount--;
             return possibleMoveOptions[3];
-        } 
+        }
+
+        if (
+            lastP1Move === lastP2Move &&
+            this.dynamiteCount <= 0 &&
+            this.opponentDynamiteCount > 0
+        ) {
+            return possibleMoveOptions[4];
+        }
 
         if (
             this.turnCount > 3 &&
-            gamestate.rounds[0].p2 === gamestate.rounds[1].p2 &&
-            gamestate.rounds[0].p2 === gamestate.rounds[2].p2 &&
-            gamestate.rounds[0].p2 === possibleMoveOptions[3]
+            gamestate.rounds[0].p1 === gamestate.rounds[1].p1 &&
+            gamestate.rounds[0].p1 === gamestate.rounds[2].p1 &&
+            gamestate.rounds[0].p1 === possibleMoveOptions[3]
         ) {
             if (this.waterCount > 0) {
                 this.waterCount--;
                 return possibleMoveOptions[4];
             }
         }
+
 
         return this.getTheMove(lastP1Move, lastP2Move);
     }
@@ -90,26 +106,25 @@ class Bot {
             let optionsForMoveIndex = Math.floor(
                 Math.random() * lengthOfOptionsForMove
             );
-            if (optionsForMove[optionsForMoveIndex] === possibleMoveOptions[3]) {
+            if (
+                optionsForMove[optionsForMoveIndex] === possibleMoveOptions[3]
+            ) {
                 this.dynamiteCount--;
             }
-            this.turnCount++;
             return optionsForMove[optionsForMoveIndex];
         }
         if (optionsForMove[0] === possibleMoveOptions[3]) {
             this.dynamiteCount--;
-            this.turnCount++;
             return optionsForMove[0];
         }
-        this.turnCount++;
         return optionsForMove[0];
     }
 }
-
-module.exports = new Bot();
 
 function spliceArrayAtIndex(index, array) {
     if (index !== undefined) {
         array.splice(index, 1);
     }
 }
+
+module.exports = new Bot();
